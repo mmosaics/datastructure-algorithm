@@ -139,7 +139,7 @@ static int currentTimeSeconds( )
 class UniformRandom
 {
   public:
-    UniformRandom( int seed = currentTimeSeconds( ) ) : generator{ seed }
+    explicit UniformRandom( int seed = currentTimeSeconds( ) ) : generator{ static_cast<std::bernoulli_distribution::result_type>(seed) }
     {
     }
       

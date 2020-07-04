@@ -12,7 +12,7 @@ class CuckooHashFamily
 {
 public:
     virtual size_t hash( const AnyType & x, int which) const = 0 ;
-    virtual int getNumberOfFunction() const = 0;
+    virtual int getNumberOfFunctions() const = 0;
     virtual void generateNewFunctions() = 0;
 };
 
@@ -22,7 +22,7 @@ class StringHashFamily: public CuckooHashFamily<std::string>
 public:
     StringHashFamily(): MULTIPLIERS(count) {}
 
-    int getNumberOfFunction() const override {
+    int getNumberOfFunctions() const override {
         return count;
     }
 
@@ -55,10 +55,10 @@ int nextPrime(int n);
 #define DATA_STRUCTURE_CPP_CUCKOOHASHTABLE_H
 
 template <typename AnyType, typename HashFamily>
-class CuckooHashTable
+class HashTable
 {
 public:
-    explicit CuckooHashTable( int size = 101) : array(nextPrime(size))
+    explicit HashTable( int size = 101) : array(nextPrime(size))
     {
         numHashFunctions = hashFunctions.getNumberOfFunctions();
         rehashes = 0;
@@ -192,8 +192,48 @@ private:
         }
     }
 
-    bool insertHelper1(AnyType && xx)
+    bool insertHelper1(AnyType && x)
     {
+        const int COUNT_LIMIT = 100;
+
+        while( true )
+        {
+            int lastPos = -1;
+            int pos;
+
+            for( int count = 0; count < COUNT_LIMIT; ++count )
+            {
+                for( int i = 0; i < numHashFunctions; ++i )
+                {
+                    pos = myHash( x, i );
+
+                    if( !isActive( pos ) )
+                    {
+                        array[ pos ] = std::move( HashEntry{ std::move( x ), true } );
+                        ++currentSize;
+                        return true;
+                    }
+                }
+
+                // None of the spots are available. Kick out random one
+                int i = 0;
+                do
+                {
+                    pos = myHash( x, r.nextInt( numHashFunctions ) );
+                } while( pos == lastPos && i++ < 5 );
+
+                lastPos = pos;
+                std::swap( x, array[ pos ].element );
+            }
+
+            if( ++rehashes > ALLOWED_REHASHES )
+            {
+                expand( );     // Make the table bigger
+                rehashes = 0;
+            }
+            else
+                rehash( );
+        }
 
     }
 
