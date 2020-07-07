@@ -9,5 +9,6 @@ class ArrayIndexOutOfBoundsException: public std::exception { };
 class IteratorOutOfBoundsException: public std::exception { };
 class IteratorMismatchException: public std::exception { };
 class IteratorUninitializedException: public std::exception{ };
+class CycleFoundException: public std::exception{};
 
 #endif
