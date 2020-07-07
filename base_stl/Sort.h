@@ -106,6 +106,56 @@ void shellSort(vector<Comparable> & a)
     }
 }
 
+//堆排序
+
+
+inline int leftChild(int i)
+{
+    return i * 2 + 1;
+}
+
+/**
+ * 下滤
+ * @tparam Comparable
+ * @param a
+ * @param i
+ * @param n
+ */
+template <typename Comparable>
+void percolateDown(vector<Comparable> & a, int i, int n)
+{
+    int child;
+    Comparable tmp;
+    for(tmp = std::move(a[i]); leftChild(i) < n; i = child)
+    {
+        child = leftChild(i);
+        if(child != n - 1 && a[child + 1] > a[child])
+            child++;
+        if(tmp < a[child])
+            a[i] = std::move(a[child]);
+        else
+            break;
+    }
+    a[i] = std::move(tmp);
+
+}
+
+template <typename Comparable>
+void heapSort(vector<Comparable> & a)
+{
+    //构建堆
+    for(int i = a.size() / 2 - 1; i >= 0; --i )
+        percolateDown(a, i, a.size());
+
+    //执行deleteMax操作，并把Max放在尾部
+    for(int j = a.size() - 1; j > 0; --j)
+    {
+        std::swap(a[0], a[j]);
+        percolateDown(a, 0, j);
+    }
+
+}
+
 
 //归并排序
 
@@ -134,7 +184,7 @@ void mergeSort(vector<Comparable> & a, vector<Comparable> & tmpArray,
     {
         int center = (left + right) / 2;
         mergeSort(a, tmpArray, left, center);
-        mergeSort(a, tmpArray, center+1; right);
+        mergeSort(a, tmpArray, center+1, right);
         merge(a, tmpArray, left, center + 1, right);
     }
 }
