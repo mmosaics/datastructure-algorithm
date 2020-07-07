@@ -9,6 +9,7 @@
 #include <iostream>
 
 using std::vector;
+using std::string;
 
 template <typename Comparable>
 void insertionSort(vector<Comparable> & a)
@@ -307,7 +308,49 @@ void quickSort(vector<Comparable> & a, int left, int right )
 }
 
 
+//基数排序
+/**
+ * 对字符串进行基数排序
+ * @param arr
+ * @param maxLen
+ */
+void radixSort(vector<string> & arr, int maxLen) {
+    const int BUCKETS = 256;
 
+    vector<vector<string>> wordsByLength(maxLen + 1);
+    vector<vector<string>> buckets(BUCKETS);
+
+    for (string &s : arr)
+        wordsByLength[s.length()].push_back(std::move(s));
+
+    int idx = 0;
+    for (auto &wordList: wordsByLength)
+        for (string &s: wordList)
+            arr[idx++] = std::move(s);
+
+    int startingIndex = arr.size();
+
+    for( int pos = maxLen - 1; pos >= 0; --pos)
+    {
+        //wordByLength[pos + 1].size() 是获得对应长度的单词的个数
+        //startingIndex是求出有相同长度单词的开始位置
+        startingIndex -= wordsByLength[pos + 1].size();
+
+        for(int i = startingIndex; i < arr.size(); ++i)
+            buckets[arr[i][pos]].push_back(std::move(arr[i]));
+
+        idx = startingIndex;
+        for(auto & thisBucket: buckets)
+        {
+            for(string & s: thisBucket)
+                arr[idx++] = std::move(s);
+
+            thisBucket.clear();
+        }
+
+    }
+
+}
 
 
 
