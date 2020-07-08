@@ -66,10 +66,8 @@ public:
             return currentNode != rhs.currentNode;
         }
 
-        const Object & operator*(const_iterator itr) const
-        {
-            return retrieve();
-        }
+        const Object & operator* ( ) const
+        { return retrieve( ); }
 
 
     protected:
