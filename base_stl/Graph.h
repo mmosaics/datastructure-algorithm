@@ -14,7 +14,10 @@
 #include "dsexceptions.h"
 #include <iostream>
 #include <set>
+#include "DisjSets.h"
 
+
+using std::priority_queue;
 using std::string;
 using std::vector;
 using std::map;
@@ -57,7 +60,7 @@ public:
         //更新to节点的入度
         ++vertexMap[to]->inDegree;
 
-        fromNode->adjacencyList.push_back(new Edge(to, weight));
+        fromNode->adjacencyList.push_back(new Edge(from, to, weight));
 
     }
 
@@ -145,7 +148,7 @@ public:
 
     void prim(Graph<Object> & primTree)
     {
-        //这里的返回方式是个人的实验性质的代码，想要看看和传引用的区别
+
         for(auto & pair: vertexMap)
             primTree.addVertex(pair.first, pair.second->element);
 
@@ -206,6 +209,49 @@ public:
 
     }
 
+    void kruskal(Graph<Object> & mst)
+    {
+        //边的集合
+        vector<Edge> edges;
+
+        //把图中的节点加入到mst中
+        for(auto & pair: vertexMap) {
+            mst.addVertex(pair.first, pair.second->element);
+            //把边加到edges当中
+            for(auto & edge: pair.second->adjacencyList)
+                edges.push_back(*edge);
+        }
+
+        DisjSets disjSets(mst.size());
+
+        //我们需要一个最小堆，这里是它的比较器
+        auto cmp = [](const Edge & e1, const Edge & e2)->bool{return e1.weight > e2.weight;};
+        priority_queue<Edge, vector<Edge>, decltype(cmp)> priorityQueue(cmp, edges);
+
+        vector<Edge> mstVec;
+
+        while (mstVec.size() != mst.size() - 1)
+        {
+            //获取最小的边
+            Edge e = priorityQueue.top();
+            priorityQueue.pop();
+
+            int uset = disjSets.find(vertexMap[e.from]->element);
+            int vset = disjSets.find(vertexMap[e.to]->element);
+
+            //两个属于两个集合，可以添加边
+            if( uset != vset)
+            {
+                mstVec.push_back(e);
+                disjSets.unionSets(uset, vset);
+            }
+        }
+
+        //给树加边
+        for(auto & edge : mstVec)
+            mst.addTwoSideEdge(edge.from, edge.to, edge.weight);
+
+    }
 
     void printPath(string from, string to)
     {
@@ -225,6 +271,11 @@ public:
 
     }
 
+    int size()
+    {
+        return currentSize;
+    }
+
 private:
 
     struct Edge;
@@ -232,11 +283,11 @@ private:
 
     struct Edge
     {
+        string from;
         string to;
         int weight;
 
-        explicit Edge(string t, int w = 0): to(std::move(t)), weight(w) {}
-        explicit Edge(string && t, int w = 0): to(std::move(t)), weight(w) {}
+        explicit Edge(string from, string t, int w = 0): from(std::move(from)),to(std::move(t)), weight(w) {}
 
     };
 
