@@ -48,6 +48,12 @@ public:
 
     Graph() : currentSize(0) {}
 
+    Graph(const Graph & rhs): currentSize(rhs.currentSize)
+    {
+        for(auto & pair : rhs.vertexMap)
+            addVertex(pair.first, pair.second->element, pair.second->id);
+    }
+
     void addVertex(string key, const Object &x, int id) {
         vertexMap[key] = new Vertex(x, id, key);
         ++currentSize;
@@ -119,12 +125,85 @@ public:
     }
 
     /**
-     * 图：有向图
+     * 图：有向有权图
      * 最大流算法
      */
-    void maxFlow() {
-        Graph<Object> flowGraph = *this;
-        Graph<Object> residualGraph = *this;
+    void maxFlow(string from, string to) {
+
+        Vertex * fromVertex = vertexMap[from];
+        Vertex * toVertex = vertexMap[to];
+
+        Graph<Object> flow = *this;
+        flow.removeAllEdges();
+
+        Vertex * utilVertex;
+
+        int minWeight = INFINITY;
+
+
+        //只要还有到达终点的边，就继续进行路径搜索
+        while (1) {
+
+            //设置所有节点未被访问
+            setAllNotVisited();
+            //每次使用最大的dijkstra求出当前的最大路径
+            dijkstraForMaxFlow(fromVertex);
+
+            if(!toVertex->known)
+                break;
+
+            //求出最大路径后需要添加反向边,需要先计算路径上最短小的边的权值
+            for (utilVertex = toVertex; utilVertex->path != NO_FATHER; utilVertex = vertexMap[utilVertex->path]) {
+
+                Vertex *&beforeUtilVertex = vertexMap[utilVertex->path];
+                //找出最小值的权值
+                for (auto &edge: beforeUtilVertex->adjacencyList) {
+                    if (edge->to == utilVertex->name) {
+                        if (edge->weight < minWeight)
+                            minWeight = edge->weight;
+                    }
+                }
+
+            }
+
+            //添加反向边
+            for (utilVertex = toVertex; utilVertex->path != NO_FATHER; utilVertex = vertexMap[utilVertex->path]) {
+
+                int remain;
+                Vertex *&beforeUtilVertex = vertexMap[utilVertex->path];
+
+                //更新去向边,修改去向边的权值或直接删除边
+                for (auto &edge: beforeUtilVertex->adjacencyList) {
+                    if (edge->to == utilVertex->name) {
+                        if (edge->weight - minWeight > 0)
+                            edge->weight = edge->weight - minWeight;
+                        else
+                            removeEdge(beforeUtilVertex->name, utilVertex->name);
+                    }
+                }
+
+                //更新反向边
+                list<Edge *> &edgesLinkToVertex = utilVertex->adjacencyList;
+                auto itr = edgesLinkToVertex.begin();
+                for (; itr != edgesLinkToVertex.end() && (*itr)->to != beforeUtilVertex->name; ++itr);
+
+                if (itr != edgesLinkToVertex.end()) {
+                    Edge *&theEdge = *itr;
+                    theEdge->weight = theEdge->weight + minWeight;
+                } else {
+                    addEdge(utilVertex->name, beforeUtilVertex->name, minWeight);
+                }
+
+                //给流图更新边
+                flow.addEdge(beforeUtilVertex->name, utilVertex->name, minWeight);
+                //添加边之后进行一个合并的工作，保证流图的边只有从一个节点流向另一个节点
+                flow.mergeTwoEdge(beforeUtilVertex->name, utilVertex->name);
+
+            }
+        }
+
+        std::cout<<"pause"<<std::endl;
+
 
     }
 
@@ -483,7 +562,7 @@ private:
         //用于计算路径长度
         int dist = 0;
         //用于标明路径
-        string path;
+        string path = NO_FATHER;
 
         //用于 Dijkstra
         bool known = false;
@@ -715,6 +794,104 @@ private:
         }
     }
 
+    void dijkstraForMaxFlow(Vertex *s) {
+        //初始化所有的节点为unknown
+        int totalUnknown = 0;
+        for (auto &pair: vertexMap) {
+            pair.second->known = false;
+            pair.second->dist = INT_MIN;
+            ++totalUnknown;
+        }
+
+        s->dist = 0;
+
+        while (totalUnknown > 0) {
+            Vertex *minVertex;
+            int maxDist = INT_MIN;
+            //首先，需要寻找拥有最长路径的Unknown，然后标记为known
+            for (auto &pair: vertexMap) {
+                if (pair.second->known == false && pair.second->dist > maxDist) {
+                    minVertex = pair.second;
+                    maxDist = minVertex->dist;
+                }
+            }
+
+            //标记为已知
+            minVertex->known = true;
+            --totalUnknown;
+
+            //遍历邻接节点
+            for (auto &edge: minVertex->adjacencyList) {
+                Vertex *w = vertexMap[edge->to];
+                if (!w->known) {
+                    //从minVertex到w的距离
+                    int cvw = edge->weight;
+
+                    //如果从这个点到w距离大于之前的距离，则更新w的距离,并且更新路径
+                    if (minVertex->dist + cvw > w->dist) {
+                        w->dist = minVertex->dist + cvw;
+                        w->path = minVertex->name;
+                    }
+                }
+            }
+        }
+
+    }
+
+    void mergeTwoEdge(const string & v, const string & w)
+    {
+        Vertex * V = vertexMap[v];
+        Vertex * W = vertexMap[w];
+        mergeTwoEdge(V, W);
+    }
+
+
+    //合并一个有向图的两个节点的边的操作，主要用于最大流的计算
+    void mergeTwoEdge(Vertex * v, Vertex * w)
+    {
+        auto vEdgeItr = v->adjacencyList.begin();
+        auto wEdgeItr = w->adjacencyList.begin();
+
+        auto vEnd = v->adjacencyList.end();
+        auto wEnd = w->adjacencyList.end();
+
+
+        //把两个迭代器都移动到对应的位置
+        for(; vEdgeItr != vEnd && (*vEdgeItr)->to != w->name; ++vEdgeItr);
+        for(; wEdgeItr != wEnd && (*wEdgeItr)->to != v->name; ++wEdgeItr);
+
+        //一共有三种情况，但只有有两个边的时候需要合并，其他情况都可以忽略
+        if(vEdgeItr != vEnd && wEdgeItr != wEnd) {
+            //v到w，w到v都有边
+            //vEdge 是从v指向w的边
+            Edge *&vEdge = *vEdgeItr;
+            //wEdge 是从w指向v的边
+            Edge *&wEdge = *wEdgeItr;
+
+            //由于两点之间的边都是反向的,求差值来进行决定
+            if (vEdge->weight > wEdge->weight) {
+                //vEdge大于wEdge，所以我们清除w到v的边，然后减少vEdge的权值
+                vEdge->weight = vEdge->weight - wEdge->weight;
+                removeEdge(wEdge->from, wEdge->to);
+
+            } else if (vEdge->weight < wEdge->weight) {
+                wEdge->weight = wEdge->weight - vEdge->weight;
+                removeEdge(vEdge->from, vEdge->to);
+
+            } else {
+                //两个边一样大，那直接清除
+                removeEdge(vEdge->from, vEdge->to);
+                removeEdge(wEdge->from, wEdge->to);
+            }
+
+        }
+
+    }
+
+
+
+
+
     void dfs(Vertex *v) {
         v->visited = true;
         //遍历邻接节点
@@ -801,8 +978,10 @@ private:
 
     void setAllNotVisited() {
         for (auto &pair: vertexMap)
-            if (pair.second->visited == true)
+            if (pair.second->visited == true) {
                 pair.second->visited = false;
+                pair.second->known = false;
+            }
     }
 
     Edge *findUnvisitedEdge() {
