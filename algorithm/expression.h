@@ -26,30 +26,35 @@ using std::vector;
  * @param hasBracket
  * @return
  */
-int priorityOfOperation(char operatorChar, bool & hasBracket)
+int priorityOfOperation(char operatorChar, bool inStack)
 {
-    //栈中不存在左括号
-    if(!hasBracket) {
+    if(!inStack) {
+        //栈外优先级
         switch (operatorChar) {
+            case '#':
+                return 0;
             case '(':
-                return 7;
+                return 6;
             case ')':
                 return 1;
             case '-':
             case '+':
-                return 3;
+                return 2;
             case '*':
             case '/':
-                return 5;
+                return 4;
             default:
                 return -1;
         }
     } else {
+        //栈内优先级
         switch (operatorChar) {
+            case '#':
+                return 0;
             case '(':
                 return 1;
             case ')':
-                return 7;
+                return 6;
             case '-':
             case '+':
                 return 3;
@@ -66,14 +71,12 @@ int priorityOfOperation(char operatorChar, bool & hasBracket)
 /**
  * 一个简单的标示结构体，用于指示分出来的词是数字还是运算符，相当简陋
  */
-enum Type {NUMBER, OPERATOR};
-struct Lexeme {
+enum Type {VAR, OPERATOR, SPECIAL};
+struct Token {
     string data;
     Type type;
 
-    Lexeme(string d, Type t):data(std::move(d)), type(t) {}
-
-    Lexeme(string && d, Type t):data(std::move(d)), type(t){}
+    Token(string d, Type t):data(std::move(d)), type(t) {}
 
 };
 
@@ -94,18 +97,18 @@ bool isOperator(const char & operatorChar) {
  * @param splitter
  * @param stringAfterSplit
  */
-void splitString(const string & expression, const char & splitter, vector<Lexeme *> & stringAfterSplit) {
+void splitString(const string & expression, const char & splitter, vector<Token *> & stringAfterSplit) {
 
     string newString;
-    Lexeme * p;
+    Token * p;
 
     for(char i : expression) {
         if(i != splitter) {
             newString.insert(newString.end(), i);
             if(isOperator(i))
-                p = new Lexeme(newString, OPERATOR);
+                p = new Token(newString, OPERATOR);
             else
-                p = new Lexeme(newString, NUMBER);
+                p = new Token(newString, VAR);
 
         }
         else {
@@ -122,13 +125,61 @@ void splitString(const string & expression, const char & splitter, vector<Lexeme
 string reversePolishNotation(const string & expression)
 {
     stack<char> operationStack;
+    vector<Token *> tokens;
+
+    //结果字符串
     string suffixExpression;
-    bool hasBracket = false;
 
-    for(int i = 0; i < expression.length(); ++i) {
+    //是否在栈中的标示
+    bool inStack = false;
 
+    //首先把#压入栈中，用于标识
+    operationStack.push('#');
+
+    //对表达式进行分词，按空格分割
+    splitString(expression, ' ', tokens);
+
+    //对结尾添加'#'
+    tokens.push_back(new Token("#", SPECIAL));
+
+    for(Token* & token: tokens) {
+
+        if(token->type == VAR) {
+            //如果token是变量，则直接添加到结果字符串中
+            suffixExpression.append(token->data);
+            suffixExpression.append(" ");
+        } else if (token->type == OPERATOR || token->type == SPECIAL) {
+            //如果是操作符，比较优先级
+            if(priorityOfOperation(token->data[0], false) > priorityOfOperation(operationStack.top(), true)) {
+                //把识别的符号和栈中的符号比较优先级，如果栈外优先级高于栈内优先级，则进栈
+                operationStack.push(token->data[0]);
+            } else {
+                //如果栈外优先级低于栈内优先级，则把栈内的元素弹出，直到栈外元素高于栈顶元素
+                while (priorityOfOperation(token->data[0], false) < priorityOfOperation(operationStack.top(), true)) {
+                    //把符号加入到结果字符串
+                    suffixExpression.append(string(1, operationStack.top()));
+                    suffixExpression.append(" ");
+                    //弹出
+                    operationStack.pop();
+                }
+                //当循环结束以后，可能会出现两种情况，1、栈内优先级和栈外优先级相等 2、栈内优先级低于栈外优先级
+                //如果两者优先级相等
+                //这种情况只会发生在 1、左括号匹配到了右括号 2、表达式结束
+                //如果当前符号是右括号或者#，那么直接把栈顶弹出即可
+                if (token->data[0] == ')' || token->data[0] == '#')
+                    operationStack.pop();
+
+                    //如果不是相等，那么就是栈内优先级低于栈外优先级，则把当前符号进栈
+                else {
+                    operationStack.push(token->data[0]);
+                }
+            }
+
+        }
 
     }
+
+    return suffixExpression;
 
 }
 
