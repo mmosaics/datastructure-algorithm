@@ -126,6 +126,7 @@ void splitString(const string & expression, const char & splitter, vector<Token 
 
 }
 
+//这是通过栈实现的
 string reversePolishNotation(const string & expression)
 {
     stack<char> operationStack;
@@ -133,9 +134,6 @@ string reversePolishNotation(const string & expression)
 
     //结果字符串
     string suffixExpression;
-
-    //是否在栈中的标示
-    bool inStack = false;
 
     //首先把#压入栈中，用于标识
     operationStack.push('#');
@@ -178,7 +176,6 @@ string reversePolishNotation(const string & expression)
                     operationStack.push(token->data[0]);
                 }
             }
-
         }
 
     }
@@ -187,5 +184,112 @@ string reversePolishNotation(const string & expression)
 
 }
 
+struct ASTNode {
+
+    Token *token;
+    ASTNode *left;
+    ASTNode *right;
+
+    explicit ASTNode(Token * t, ASTNode * l = nullptr, ASTNode * r = nullptr) : token(t), left(l), right(r) {}
+
+};
+
+void clearAST(ASTNode * root)
+{
+    if(root != nullptr)
+    {
+        clearAST(root->left);
+        clearAST(root->right);
+        delete root;
+        root = nullptr;
+    }
+}
+
+void printReversePolish(ASTNode * root) {
+
+    if(root != nullptr) {
+        printReversePolish(root->left);
+        printReversePolish(root->right);
+        std::cout<< root->token->data << " ";
+    }
+
+}
+
+//我们假设表达式都是以字母的形式输入的
+ASTNode * buildAST(const string & express)
+{
+
+    vector<Token *> tokens;
+    //用于存放操作符的栈
+    stack<ASTNode *> operatorStack;
+    //用于存放标识符的栈
+    stack<ASTNode *> idStack;
+
+    operatorStack.push(new ASTNode(new Token("#", SPECIAL)));
+
+    //分词，可以看作一个简单的词法分析过程
+    splitString(express, ' ', tokens);
+
+    //初始化抽象语法树
+    ASTNode * root;
+
+    tokens.push_back(new Token("#", SPECIAL));
+
+    //开始构建一个抽象语法树
+    for(auto & token: tokens) {
+        if(token->type == VAR) {
+            //如果token是一个变量，则加入到idStack中
+            auto newNode = new ASTNode(token);
+            idStack.push(newNode);
+        } else if (token->type == OPERATOR || token->type == SPECIAL) {
+            //如果token是一个操作符，则需要进行比较优先级和合并树的操作
+            //如果是操作符，比较优先级
+            if(priorityOfOperation(token->data[0], false) > priorityOfOperation(operatorStack.top()->token->data[0], true)) {
+                //把识别的符号和栈中的符号比较优先级，如果栈外优先级高于栈内优先级，则进栈
+                operatorStack.push(new ASTNode(token));
+
+            } else {
+                //如果栈外优先级低于栈内优先级，则把栈内的元素弹出，直到栈外元素高于栈顶元素
+                while (priorityOfOperation(token->data[0], false) < priorityOfOperation(operatorStack.top()->token->data[0], true)) {
+                    //把符号节点作为根，两个标识符为子拼接
+                    ASTNode * & parent = operatorStack.top();
+                    operatorStack.pop();
+
+                    ASTNode * & right = idStack.top();
+                    idStack.pop();
+
+                    ASTNode * & left = idStack.top();
+                    idStack.pop();
+
+                    parent->left = left;
+                    parent->right = right;
+
+                    //把新生成的节点入栈
+                    idStack.push(parent);
+
+                }
+                //当循环结束以后，可能会出现两种情况，1、栈内优先级和栈外优先级相等 2、栈内优先级低于栈外优先级
+                //如果两者优先级相等
+                //这种情况只会发生在 1、左括号匹配到了右括号 2、表达式结束
+                //如果当前符号是右括号或者#，那么直接把栈顶弹出即可
+                if (token->data[0] == ')' || token->data[0] == '#')
+                    operatorStack.pop();
+
+                    //如果不是相等，那么就是栈内优先级低于栈外优先级，则把当前符号进栈
+                else {
+                    operatorStack.push(new ASTNode(token));
+                }
+            }
+        }
+
+    }
+
+    //最后把栈中的树弹出
+    ASTNode * result = idStack.top();
+    idStack.pop();
+
+    return result;
+
+}
 
 #endif //DATA_STRUCTURE_CPP_EXPRESSION_H
