@@ -157,6 +157,33 @@ bool isCompleteTree(BinaryNode * root)
 
 }
 
+/**
+ * 设树B是一棵采用二叉链表结构存储的二叉树，编写一个把树B中所有节点的左、右子树进行交换的函数
+ */
+
+/**
+ * 这一道题比较简单，就不做过多解释，就是一个后序遍历的改版
+ */
+
+void reverseChild(BinaryNode*&);
+
+void reverse(BinaryNode * root)
+{
+    if(root)
+    {
+        reverse(root->left);
+        reverse(root->right);
+        reverseChild(root);
+    }
+
+}
+
+void reverseChild(BinaryNode * & node)
+{
+    BinaryNode * leftChild = node->left;
+    node->left = node->right;
+    node->right = leftChild;
+}
 
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
