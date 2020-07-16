@@ -40,6 +40,15 @@ void insert(int x, BinaryNode *&root) {
     else; // 如果相等，什么都不做，暂时不考虑值相等
 }
 
+void printTree(BinaryNode * root)
+{
+    if(root)
+    {
+        printTree(root->left);
+        std::cout<<root->element << " ";
+        printTree(root->right);
+    }
+}
 
 //下面是具体的一些相关算法
 
@@ -102,7 +111,6 @@ BinaryNode *preInTree(int A[], int B[], int al, int ar, int bl, int br) {
 /**
  * 二叉树按二叉链表形式存储，写一个判别给定二叉树是否是完全二叉树的算法
  */
-
 /**
  * 分析：这道题主要是要把握完全二叉树的结构特点，就是一定是按层数顺序排列的，所以可以很自然想到层序遍历
  * 具体想法是，
@@ -157,14 +165,63 @@ bool isCompleteTree(BinaryNode * root)
 
 }
 
+
+/**
+ * 假设二叉查找树采用二叉链表存储结构存储，试设计一个算法，计算一棵给定二叉树的所有双分支节点个数
+ */
+/**
+ * 也是考察的层序遍历
+ */
+int statisticTwoDegreeNode(BinaryNode * root)
+{
+    //需要一个队列辅助
+    queue<BinaryNode *> nodeQueue;
+
+    //统计分支数
+    int degree = 0;
+
+    //统计二分支节点数
+    int num = 0;
+
+    //将根节点进入队列
+    nodeQueue.push(root);
+
+    //如果队列不为空
+    while(!nodeQueue.empty())
+    {
+        //出队
+        BinaryNode * p = nodeQueue.front();
+        nodeQueue.pop();
+
+        if(p->left)
+        {
+            nodeQueue.push(p->left);
+            ++degree;
+        }
+        if(p->right)
+        {
+            nodeQueue.push(p->right);
+            ++degree;
+        }
+
+        if(degree == 2)
+            ++num;
+
+        degree = 0;
+
+    }
+
+    return num;
+
+}
+
+
 /**
  * 设树B是一棵采用二叉链表结构存储的二叉树，编写一个把树B中所有节点的左、右子树进行交换的函数
  */
-
 /**
  * 这一道题比较简单，就不做过多解释，就是一个后序遍历的改版
  */
-
 void reverseChild(BinaryNode*&);
 
 void reverse(BinaryNode * root)
@@ -184,6 +241,94 @@ void reverseChild(BinaryNode * & node)
     node->left = node->right;
     node->right = leftChild;
 }
+
+
+/**
+ * 假设二叉树采用二叉链存储结构存储，设计一个算法，求先序遍历序列中第k个节点的值
+ */
+/**
+ * 想法是，执行先序遍历，然后遍历一个节点就把节点入队，最后依次出队并统计个数
+ */
+
+void preOrder(BinaryNode *, queue<BinaryNode *> &);
+
+int findKth(BinaryNode * root, int k)
+{
+    queue<BinaryNode *> nodeQueue;
+
+    preOrder(root, nodeQueue);
+
+    BinaryNode * resultNode = nullptr;
+
+    //计数器
+    int count = 0;
+
+    while (!nodeQueue.empty())
+    {
+        resultNode = nodeQueue.front();
+        nodeQueue.pop();
+        ++count;
+        if(count == k)
+            break;
+    }
+
+    return resultNode->element;
+}
+
+
+void preOrder(BinaryNode * root, queue<BinaryNode *> & nodeQueue)
+{
+    if(root)
+    {
+        nodeQueue.push(root);
+        preOrder(root->left, nodeQueue);
+        preOrder(root->right, nodeQueue);
+    }
+}
+
+
+
+/**
+ * 已知二叉树以二叉链表存储，编写算法完成；对于树中每个元素值为x的节点，删去以它为根的子树，并释放相应的空间
+ */
+/*
+ * 本质也是一道先序遍历的题目，比较简单
+ */
+
+void clearTree(BinaryNode * & );
+
+
+void deleteSubTreeOfX(BinaryNode * & root, int x)
+{
+    if(root)
+    {
+        //如果找到了对应元素，则删除该子树，并返回
+        if(root->element == x) {
+            clearTree(root);
+            return;
+        }
+        deleteSubTreeOfX(root->left, x);
+        deleteSubTreeOfX(root->right, x);
+    }
+
+}
+
+void clearTree(BinaryNode * & root)
+{
+    if(root)
+    {
+        clearTree(root->left);
+        clearTree(root->right);
+        delete root;
+        root = nullptr;
+    }
+}
+
+
+/**
+ * 在二叉树中查找值为x的节点，试编写算法打印值为x的节点的所有祖先，假设值为x的节点不多于1个
+ */
+
 
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
