@@ -58,6 +58,33 @@ int height(BinaryNode * & root)
 {
     queue<BinaryNode *> nodeQueue;
 
+    BinaryNode * p = root;
+
+    nodeQueue.push(p);
+
+    BinaryNode * last = nodeQueue.back();
+
+    int height = 0;
+
+    while(!nodeQueue.empty())
+    {
+        p = nodeQueue.front();
+        nodeQueue.pop();
+
+        if(p->left)
+            nodeQueue.push(p->left);
+        if(p->right)
+            nodeQueue.push(p->right);
+
+        if(p == last) {
+            last = nodeQueue.back();
+            height++;
+        }
+
+    }
+
+    return height;
+
 }
 
 /**
@@ -502,6 +529,126 @@ void ancestor(BinaryNode * & root, BinaryNode * p, BinaryNode * q, BinaryNode * 
 
     r = target;
 
+}
+
+/**
+ * 设计一个算法，求非空二叉树的宽短
+ */
+
+int breath(BinaryNode * & root)
+{
+    queue<BinaryNode *> nodeQueue;
+
+    BinaryNode * p = root;
+
+    nodeQueue.push(p);
+
+    BinaryNode * last = nodeQueue.back();
+
+    int maxWidth = -1;
+    int levelWidth = 0;
+
+    while(!nodeQueue.empty())
+    {
+        p = nodeQueue.front();
+        nodeQueue.pop();
+        ++levelWidth;
+
+        if(p->left)
+            nodeQueue.push(p->left);
+        if(p->right)
+            nodeQueue.push(p->right);
+
+        if(levelWidth > maxWidth)
+            maxWidth = levelWidth;
+
+        if(last == p) {
+            last = nodeQueue.back();
+            levelWidth = 0;
+        }
+    }
+
+    return  maxWidth;
+
+}
+
+/**
+ * 设有一棵满二叉树，已知其先序序列为pre，设计一个算法求其后序序列
+ */
+
+ void buildTree(BinaryNode * & root, int pre[], int l, int r)
+{
+     if(l > r)
+         return;
+
+     int total = r - l + 1;
+
+     int halfTreeSize = (total-1)/2;
+
+     int subLeftTreeLeft = l + 1;
+     int subLeftTreeRight = l + halfTreeSize;
+
+     int subRightTreeLeft = l + halfTreeSize + 1;
+     int subRightTreeRight = l + 2 * halfTreeSize;
+
+     root = new BinaryNode(pre[l]);
+
+     //构建左子树
+     buildTree(root->left, pre, subLeftTreeLeft, subLeftTreeRight);
+     //构建右子树
+     buildTree(root->right, pre, subRightTreeLeft, subRightTreeRight);
+
+}
+
+void postOrder(BinaryNode * & root, vector<int> & post)
+{
+     if(root)
+     {
+         postOrder(root->left, post);
+         postOrder(root->right, post);
+         post.push_back(root->element);
+     }
+}
+
+void getPostByPre(int pre[], vector<int> & post, int n)
+{
+     BinaryNode * root;
+     buildTree(root, pre, 0, n-1);
+     postOrder(root, post);
+
+}
+
+/**
+ * 设计一个算法将二叉树的叶节点从左到右的顺序连成一个单链表，表头指针为head，二叉树按二叉链表方式存储，
+ * 链接时用叶节点的右指针域来存在单链表指针
+ */
+
+void linkLeaf(BinaryNode * & root, BinaryNode * & pre, BinaryNode * & head)
+{
+    if(root)
+    {
+        linkLeaf(root->left, pre, head);
+        linkLeaf(root->right, pre, head);
+
+        if(root->left == nullptr && root->right == nullptr && pre != nullptr)
+        {
+            pre->right = root;
+            pre = root;
+        }
+        if(root->left == nullptr && root->right == nullptr && pre == nullptr)
+        {
+            pre = root;
+            head = root;
+        }
+    }
+}
+
+BinaryNode * linkLeaf(BinaryNode * & root)
+{
+    BinaryNode * pre = nullptr;
+    BinaryNode * head = nullptr;
+    linkLeaf(root, pre, head);
+    return head;
 }
 
 
