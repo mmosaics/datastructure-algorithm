@@ -51,6 +51,14 @@ void printTree(BinaryNode * root)
 }
 
 //下面是具体的一些相关算法
+/**
+ * 使用非递归算法求二叉树高度
+ */
+int height(BinaryNode * & root)
+{
+    queue<BinaryNode *> nodeQueue;
+
+}
 
 /**
  * 设一颗二叉树中各节点的值互不相同，其先序遍历和中序遍历分别存于两个一维数组A[1...n]和B[1...n]中，试编写算法建立该二叉树的二叉链表
@@ -329,12 +337,172 @@ void clearTree(BinaryNode * & root)
  */
 
 //中序遍历（非递归）
+//递归的本质是栈，把一个程序改为非递归，肯定是需要栈做辅助的
+void inOrderWithoutRecursive(BinaryNode * & root)
+{
+    stack<BinaryNode *> nodeStack;
+    BinaryNode * p = root;
+    //如果p不为空或者栈不为空，则处理树节点
+    while (p || !nodeStack.empty())
+    {
+        //我们需要一直访问p的左儿子，一直到最深处，然后直到左儿子为空，会进入else例程，此时我们知道，栈顶就是p
+        if(p) {
+            nodeStack.push(p);
+            p = p->left;
+        }
+        //如果为空，我们弹出栈顶元素，这个时候栈顶元素其实就是空的节点的父节点，那么我们只需要弹出，再访问，就达到了先访问左儿子，再父亲，然后把指针指向右儿子，就能完成中序的顺序
+        else {
+            p = nodeStack.top();
+            nodeStack.pop();
+            //visit(p);
+            p = p->right;
+        }
+    }
+}
 
+//先序遍历（非递归）
+void preOrderWithoutRecursive(BinaryNode * & root)
+{
+    stack<BinaryNode *> nodeStack;
+    BinaryNode * p = root;
+    while(p || !nodeStack.empty())
+    {
+        if(p) {
+            //visit(p);
+            nodeStack.push(p);
+            p = p->left;
+        }
+        else {
+            p = nodeStack.top();
+            p = p->right;
+        }
+    }
+}
+
+//后序遍历
+void postOrderWithoutRecursive(BinaryNode * & root)
+{
+    stack<BinaryNode *> nodeStack;
+    BinaryNode * p = root;
+    BinaryNode * recent = nullptr;
+
+    while(p || !nodeStack.empty())
+    {
+        if(p)
+        {
+            nodeStack.push(p);
+            p = p->left;
+        }
+        /*
+         * 对于后序遍历，和前序遍历、中序遍历的情况不太一样
+         * 我们在前序遍历和中序遍历中，其实控制流程是一模一样的，不一样的只是访问元素的时机，在这两种遍历中，如果遇到左儿子为空
+         *  我们可以直接把栈中元素弹出，然后进行访问（这里主要是指中序，前序在入栈前就已经访问）
+         *
+         * 但是后序情况不太一样，我们在遇到左儿子为空的时候，不能立即弹出栈中元素，因为我们必须保证在访问左儿子之后的节点必须是右儿子
+         * 一次弹出，就等于我们是对该节点的一次访问。因此我们必须得保证父节点在访问了左儿子和右儿子之后弹出
+         * 因此在判断到空指针的时候，我们需要进行一定的条件判断，来判断是否存在右儿子，然后再进行相关的操作
+         */
+        //如果没有左儿子，对右儿子进行判断
+        else {
+            //这里我们取出栈顶元素，但是并不弹出，是为了获取到它的右儿子
+            p = nodeStack.top();
+            //之所以设置recent变量，是为了记录是否已经访问过右儿子，因为我们没有把元素弹出
+            //如果不标示一个右儿子是否访问过，那么程序总是会返回到这个右儿子的父节点，然后进入无限循环
+            if(p->right && p->right != recent)
+            {
+                //如果有右儿子，那么我们就把它按照正常的递归过程，仍然放入栈，然后进入新的循环
+                p = p->right;
+                nodeStack.push(p);
+                p = p->left;
+            }
+            //这对应于没有右儿子的情况，这种情况我们就可以把它弹出
+            else {
+                nodeStack.pop();
+                //visit(p);
+                recent = p;
+                p = nullptr;
+            }
+        }
+    }
+}
 
 /**
  * 在二叉树中查找值为x的节点，试编写算法打印值为x的节点的所有祖先，假设值为x的节点不多于1个
  */
+ void findAncestorOfX(BinaryNode * & root , int x, vector<BinaryNode *> & ancestor)
+{
+     stack<BinaryNode *> nodeStack;
+     BinaryNode * p = root;
+     BinaryNode * recent = nullptr;
 
+     while( p || !nodeStack.empty())
+     {
+         if(p)
+         {
+             if(p->element == x)
+                 break;
+             nodeStack.push(p);
+             p = p->left;
+         }
+         else
+         {
+             p = nodeStack.top();
+             //有右儿子
+             if(p->right && p->right != recent)
+             {
+                 p = p->right;
+                 nodeStack.push(p);
+                 p = p->left;
+             }
+             //没有右儿子
+             else
+             {
+                 nodeStack.pop();
+                 recent = p;
+                 p = nullptr;
+             }
+         }
+     }
+
+     //只要栈非空，就一直弹出，弹出的都是x的祖先
+     while (!nodeStack.empty())
+     {
+         ancestor.push_back(nodeStack.top());
+         nodeStack.pop();
+     }
+
+}
+
+/**
+ * 编写算法找到p和q的最近公共祖先节点r
+ */
+ //可以通过使用上面一题已经写好的方法，然后通过两个祖先数组找到最近的元素即可
+void ancestor(BinaryNode * & root, BinaryNode * p, BinaryNode * q, BinaryNode * & r)
+{
+    vector<BinaryNode *> pAncestor;
+    vector<BinaryNode *> qAncestor;
+
+    findAncestorOfX(root, p->element, pAncestor);
+    findAncestorOfX(root, q->element, qAncestor);
+
+    BinaryNode * target;
+
+    int flag = 0;
+
+    for(auto & pNode: pAncestor)
+    {
+        for(auto & qNode: qAncestor)
+        {
+            if(pNode == qNode && flag == 0) {
+                target = pNode;
+                flag = 1;
+            }
+        }
+    }
+
+    r = target;
+
+}
 
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
