@@ -292,4 +292,32 @@ ASTNode * buildAST(const string & express)
 
 }
 
+
+/**
+ * 根据表达式树生成中缀表达式
+ */
+
+void convert(ASTNode* & root, int deep)
+{
+    if(root == nullptr)
+        return;
+    else if(root->left == nullptr && root->right == nullptr)
+        std::cout<<root->token->data;
+    else {
+        if(deep > 1)
+            std::cout<< "(";
+        convert(root->left, deep + 1);
+        std::cout<<root->token->data;
+        convert(root->right, deep + 1);
+        if(deep > 1)
+            std::cout<< ")";
+    }
+
+}
+
+void convertAstToInOrder(ASTNode* & root)
+{
+    convert(root, 1);
+}
+
 #endif //DATA_STRUCTURE_CPP_EXPRESSION_H

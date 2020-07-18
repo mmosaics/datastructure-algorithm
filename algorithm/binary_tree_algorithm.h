@@ -51,6 +51,20 @@ void printTree(BinaryNode * root)
 }
 
 //下面是具体的一些相关算法
+
+/**
+ * 递归求高度
+ */
+
+int heightWithRecursive(BinaryNode * & root)
+{
+    BinaryNode * p = root;
+    if(!p)
+        return 0;
+    return std::max(heightWithRecursive(p->left), heightWithRecursive(p->right)) + 1;
+
+}
+
 /**
  * 使用非递归算法求二叉树高度
  */
@@ -650,6 +664,116 @@ BinaryNode * linkLeaf(BinaryNode * & root)
     linkLeaf(root, pre, head);
     return head;
 }
+
+
+/**
+ * 试设计判断两棵树是否相似的算法，所谓二叉树T1和T2相似，指的是T1和T2都是空的二叉树或都只有一个根节点，或T1的左子树和T2的左子树是相似的
+ * 且T1的右子树的T2的右子树是相似的
+ */
+
+int similar(BinaryNode * & t1, BinaryNode * & t2)
+{
+    //这道题应该采用递归的思想，因为题目其实就已经暗示了递归的方法
+    int left;
+    int right;
+
+    //如果两树皆为空，则相似
+    if(t1 == nullptr && t2 == nullptr)
+        return 1;
+
+    //如果有一树为空，另一树不为空，则不相似
+    if(t1 == nullptr || t2 == nullptr)
+        return 0;
+    //否则两树都不为空，则需要进一步判断左右子树的情况
+    else
+    {
+        left = similar(t1->left, t2->left);
+        right = similar(t1->right, t2->right);
+        return left && right;
+    }
+
+}
+
+/**
+ * 二叉树的带权路径长度（WPL）是二叉树中所有叶节点的带权路径长度之和。给定一棵二叉树T，采用二叉链表存储
+ * 请设计求T的WPL的算法
+ */
+ //本质上还是可以通过层序遍历来做，遍历的过程记录高度，然后遇到叶子节点就计算带权路径长
+
+int computeWPL(BinaryNode * & root)
+{
+    queue<BinaryNode *> nodeQueue;
+
+    BinaryNode * p = root;
+
+    int WPL = 0;
+
+    int length = 0;
+
+    nodeQueue.push(p);
+
+    BinaryNode * last = nodeQueue.front();
+
+
+    while (!nodeQueue.empty())
+    {
+        p = nodeQueue.front();
+        nodeQueue.pop();
+
+        int isLeaf = 0;
+
+        if(p->left) {
+            nodeQueue.push(p->left);
+            ++isLeaf;
+        }
+        if(p->right) {
+            nodeQueue.push(p->right);
+            ++isLeaf;
+        }
+
+        if(!isLeaf)
+            WPL += length * p->element;
+
+        if(last == p)
+        {
+            ++length;
+            last = nodeQueue.back();
+        }
+
+    }
+
+    return WPL;
+}
+
+/**
+ * 请设计一个算法，将给定的表达式树（二叉树）转换为等价的中缀表达式（通过括号反应操作符的计算次序）并输出。
+ */
+
+
+void convert(BinaryNode * & root, int deep)
+{
+    if(root == nullptr)
+        return;
+    else if(root->left == nullptr && root->right == nullptr)
+        std::cout<<root->element;
+    else {
+        if(deep > 1)
+            std::cout<< "(";
+        convert(root->left, deep + 1);
+        std::cout<<root->element;
+        convert(root->right, deep + 1);
+        if(deep > 1)
+            std::cout<< ")";
+    }
+
+}
+
+void convertAstToInOrder(BinaryNode * & root)
+{
+    convert(root, 1);
+}
+
+
 
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
