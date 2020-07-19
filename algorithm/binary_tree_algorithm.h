@@ -774,6 +774,35 @@ void convertAstToInOrder(BinaryNode * & root)
 }
 
 
+/**
+ * 判断一棵树是否是二叉查找树
+ */
+
+bool assertBinarySearchTree(BinaryNode * & root)
+{
+    bool leftS = true, rightS = true;
+    if(root)
+    {
+
+        leftS = assertBinarySearchTree(root->left);
+        rightS = assertBinarySearchTree(root->right);
+
+        /**
+        if((root->left && root->left->element > root->element) ||
+            (root->right && root->right->element < root->element))
+            return false;
+            */
+
+        if(root->left && root->left->element > root->element)
+            leftS = false;
+        if(root->right && root->right->element < root->element)
+            rightS  = false;
+
+    }
+
+    return leftS && rightS;
+}
+
 
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
