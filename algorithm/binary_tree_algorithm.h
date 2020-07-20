@@ -40,12 +40,10 @@ void insert(int x, BinaryNode *&root) {
     else; // 如果相等，什么都不做，暂时不考虑值相等
 }
 
-void printTree(BinaryNode * root)
-{
-    if(root)
-    {
+void printTree(BinaryNode *root) {
+    if (root) {
         printTree(root->left);
-        std::cout<<root->element << " ";
+        std::cout << root->element << " ";
         printTree(root->right);
     }
 }
@@ -56,10 +54,9 @@ void printTree(BinaryNode * root)
  * 递归求高度
  */
 
-int heightWithRecursive(BinaryNode * & root)
-{
-    BinaryNode * p = root;
-    if(!p)
+int heightWithRecursive(BinaryNode *&root) {
+    BinaryNode *p = root;
+    if (!p)
         return 0;
     return std::max(heightWithRecursive(p->left), heightWithRecursive(p->right)) + 1;
 
@@ -68,29 +65,27 @@ int heightWithRecursive(BinaryNode * & root)
 /**
  * 使用非递归算法求二叉树高度
  */
-int height(BinaryNode * & root)
-{
+int height(BinaryNode *&root) {
     queue<BinaryNode *> nodeQueue;
 
-    BinaryNode * p = root;
+    BinaryNode *p = root;
 
     nodeQueue.push(p);
 
-    BinaryNode * last = nodeQueue.back();
+    BinaryNode *last = nodeQueue.back();
 
     int height = 0;
 
-    while(!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         p = nodeQueue.front();
         nodeQueue.pop();
 
-        if(p->left)
+        if (p->left)
             nodeQueue.push(p->left);
-        if(p->right)
+        if (p->right)
             nodeQueue.push(p->right);
 
-        if(p == last) {
+        if (p == last) {
             last = nodeQueue.back();
             height++;
         }
@@ -170,8 +165,7 @@ BinaryNode *preInTree(int A[], int B[], int al, int ar, int bl, int br) {
  * @param root
  * @return
  */
-bool isCompleteTree(BinaryNode * root)
-{
+bool isCompleteTree(BinaryNode *root) {
 
     queue<BinaryNode *> nodeQueue;
 
@@ -184,26 +178,25 @@ bool isCompleteTree(BinaryNode * root)
     nodeQueue.push(root);
 
     //队列非空
-    while(!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         //将元素弹出
-        BinaryNode * & p = nodeQueue.front();
+        BinaryNode *&p = nodeQueue.front();
         nodeQueue.pop();
 
-        if(p->left) {
+        if (p->left) {
             nodeQueue.push(p->left);
             ++sentinel;
         }
 
-        if(p->right) {
+        if (p->right) {
             nodeQueue.push(p->right);
             ++sentinel;
         }
 
-        if(sentinel == 1 && flag == 0)
+        if (sentinel == 1 && flag == 0)
             flag = 1;
 
-        if(sentinel > 0 && flag == 1)
+        if (sentinel > 0 && flag == 1)
             return false;
 
         sentinel = 0;
@@ -221,8 +214,7 @@ bool isCompleteTree(BinaryNode * root)
 /**
  * 也是考察的层序遍历
  */
-int statisticTwoDegreeNode(BinaryNode * root)
-{
+int statisticTwoDegreeNode(BinaryNode *root) {
     //需要一个队列辅助
     queue<BinaryNode *> nodeQueue;
 
@@ -236,24 +228,21 @@ int statisticTwoDegreeNode(BinaryNode * root)
     nodeQueue.push(root);
 
     //如果队列不为空
-    while(!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         //出队
-        BinaryNode * p = nodeQueue.front();
+        BinaryNode *p = nodeQueue.front();
         nodeQueue.pop();
 
-        if(p->left)
-        {
+        if (p->left) {
             nodeQueue.push(p->left);
             ++degree;
         }
-        if(p->right)
-        {
+        if (p->right) {
             nodeQueue.push(p->right);
             ++degree;
         }
 
-        if(degree == 2)
+        if (degree == 2)
             ++num;
 
         degree = 0;
@@ -271,12 +260,10 @@ int statisticTwoDegreeNode(BinaryNode * root)
 /**
  * 这一道题比较简单，就不做过多解释，就是一个后序遍历的改版
  */
-void reverseChild(BinaryNode*&);
+void reverseChild(BinaryNode *&);
 
-void reverse(BinaryNode * root)
-{
-    if(root)
-    {
+void reverse(BinaryNode *root) {
+    if (root) {
         reverse(root->left);
         reverse(root->right);
         reverseChild(root);
@@ -284,9 +271,8 @@ void reverse(BinaryNode * root)
 
 }
 
-void reverseChild(BinaryNode * & node)
-{
-    BinaryNode * leftChild = node->left;
+void reverseChild(BinaryNode *&node) {
+    BinaryNode *leftChild = node->left;
     node->left = node->right;
     node->right = leftChild;
 }
@@ -301,23 +287,21 @@ void reverseChild(BinaryNode * & node)
 
 void preOrder(BinaryNode *, queue<BinaryNode *> &);
 
-int findKth(BinaryNode * root, int k)
-{
+int findKth(BinaryNode *root, int k) {
     queue<BinaryNode *> nodeQueue;
 
     preOrder(root, nodeQueue);
 
-    BinaryNode * resultNode = nullptr;
+    BinaryNode *resultNode = nullptr;
 
     //计数器
     int count = 0;
 
-    while (!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         resultNode = nodeQueue.front();
         nodeQueue.pop();
         ++count;
-        if(count == k)
+        if (count == k)
             break;
     }
 
@@ -325,10 +309,8 @@ int findKth(BinaryNode * root, int k)
 }
 
 
-void preOrder(BinaryNode * root, queue<BinaryNode *> & nodeQueue)
-{
-    if(root)
-    {
+void preOrder(BinaryNode *root, queue<BinaryNode *> &nodeQueue) {
+    if (root) {
         nodeQueue.push(root);
         preOrder(root->left, nodeQueue);
         preOrder(root->right, nodeQueue);
@@ -344,15 +326,13 @@ void preOrder(BinaryNode * root, queue<BinaryNode *> & nodeQueue)
  * 本质也是一道先序遍历的题目，比较简单
  */
 
-void clearTree(BinaryNode * & );
+void clearTree(BinaryNode *&);
 
 
-void deleteSubTreeOfX(BinaryNode * & root, int x)
-{
-    if(root)
-    {
+void deleteSubTreeOfX(BinaryNode *&root, int x) {
+    if (root) {
         //如果找到了对应元素，则删除该子树，并返回
-        if(root->element == x) {
+        if (root->element == x) {
             clearTree(root);
             return;
         }
@@ -362,10 +342,8 @@ void deleteSubTreeOfX(BinaryNode * & root, int x)
 
 }
 
-void clearTree(BinaryNode * & root)
-{
-    if(root)
-    {
+void clearTree(BinaryNode *&root) {
+    if (root) {
         clearTree(root->left);
         clearTree(root->right);
         delete root;
@@ -379,19 +357,17 @@ void clearTree(BinaryNode * & root)
 
 //中序遍历（非递归）
 //递归的本质是栈，把一个程序改为非递归，肯定是需要栈做辅助的
-void inOrderWithoutRecursive(BinaryNode * & root)
-{
+void inOrderWithoutRecursive(BinaryNode *&root) {
     stack<BinaryNode *> nodeStack;
-    BinaryNode * p = root;
+    BinaryNode *p = root;
     //如果p不为空或者栈不为空，则处理树节点
-    while (p || !nodeStack.empty())
-    {
+    while (p || !nodeStack.empty()) {
         //我们需要一直访问p的左儿子，一直到最深处，然后直到左儿子为空，会进入else例程，此时我们知道，栈顶就是p
-        if(p) {
+        if (p) {
             nodeStack.push(p);
             p = p->left;
         }
-        //如果为空，我们弹出栈顶元素，这个时候栈顶元素其实就是空的节点的父节点，那么我们只需要弹出，再访问，就达到了先访问左儿子，再父亲，然后把指针指向右儿子，就能完成中序的顺序
+            //如果为空，我们弹出栈顶元素，这个时候栈顶元素其实就是空的节点的父节点，那么我们只需要弹出，再访问，就达到了先访问左儿子，再父亲，然后把指针指向右儿子，就能完成中序的顺序
         else {
             p = nodeStack.top();
             nodeStack.pop();
@@ -402,18 +378,15 @@ void inOrderWithoutRecursive(BinaryNode * & root)
 }
 
 //先序遍历（非递归）
-void preOrderWithoutRecursive(BinaryNode * & root)
-{
+void preOrderWithoutRecursive(BinaryNode *&root) {
     stack<BinaryNode *> nodeStack;
-    BinaryNode * p = root;
-    while(p || !nodeStack.empty())
-    {
-        if(p) {
+    BinaryNode *p = root;
+    while (p || !nodeStack.empty()) {
+        if (p) {
             //visit(p);
             nodeStack.push(p);
             p = p->left;
-        }
-        else {
+        } else {
             p = nodeStack.top();
             p = p->right;
         }
@@ -421,42 +394,38 @@ void preOrderWithoutRecursive(BinaryNode * & root)
 }
 
 //后序遍历
-void postOrderWithoutRecursive(BinaryNode * & root)
-{
+void postOrderWithoutRecursive(BinaryNode *&root) {
     stack<BinaryNode *> nodeStack;
-    BinaryNode * p = root;
-    BinaryNode * recent = nullptr;
+    BinaryNode *p = root;
+    BinaryNode *recent = nullptr;
 
-    while(p || !nodeStack.empty())
-    {
-        if(p)
-        {
+    while (p || !nodeStack.empty()) {
+        if (p) {
             nodeStack.push(p);
             p = p->left;
         }
-        /*
-         * 对于后序遍历，和前序遍历、中序遍历的情况不太一样
-         * 我们在前序遍历和中序遍历中，其实控制流程是一模一样的，不一样的只是访问元素的时机，在这两种遍历中，如果遇到左儿子为空
-         *  我们可以直接把栈中元素弹出，然后进行访问（这里主要是指中序，前序在入栈前就已经访问）
-         *
-         * 但是后序情况不太一样，我们在遇到左儿子为空的时候，不能立即弹出栈中元素，因为我们必须保证在访问左儿子之后的节点必须是右儿子
-         * 一次弹出，就等于我们是对该节点的一次访问。因此我们必须得保证父节点在访问了左儿子和右儿子之后弹出
-         * 因此在判断到空指针的时候，我们需要进行一定的条件判断，来判断是否存在右儿子，然后再进行相关的操作
-         */
-        //如果没有左儿子，对右儿子进行判断
+            /*
+             * 对于后序遍历，和前序遍历、中序遍历的情况不太一样
+             * 我们在前序遍历和中序遍历中，其实控制流程是一模一样的，不一样的只是访问元素的时机，在这两种遍历中，如果遇到左儿子为空
+             *  我们可以直接把栈中元素弹出，然后进行访问（这里主要是指中序，前序在入栈前就已经访问）
+             *
+             * 但是后序情况不太一样，我们在遇到左儿子为空的时候，不能立即弹出栈中元素，因为我们必须保证在访问左儿子之后的节点必须是右儿子
+             * 一次弹出，就等于我们是对该节点的一次访问。因此我们必须得保证父节点在访问了左儿子和右儿子之后弹出
+             * 因此在判断到空指针的时候，我们需要进行一定的条件判断，来判断是否存在右儿子，然后再进行相关的操作
+             */
+            //如果没有左儿子，对右儿子进行判断
         else {
             //这里我们取出栈顶元素，但是并不弹出，是为了获取到它的右儿子
             p = nodeStack.top();
             //之所以设置recent变量，是为了记录是否已经访问过右儿子，因为我们没有把元素弹出
             //如果不标示一个右儿子是否访问过，那么程序总是会返回到这个右儿子的父节点，然后进入无限循环
-            if(p->right && p->right != recent)
-            {
+            if (p->right && p->right != recent) {
                 //如果有右儿子，那么我们就把它按照正常的递归过程，仍然放入栈，然后进入新的循环
                 p = p->right;
                 nodeStack.push(p);
                 p = p->left;
             }
-            //这对应于没有右儿子的情况，这种情况我们就可以把它弹出
+                //这对应于没有右儿子的情况，这种情况我们就可以把它弹出
             else {
                 nodeStack.pop();
                 //visit(p);
@@ -470,71 +439,60 @@ void postOrderWithoutRecursive(BinaryNode * & root)
 /**
  * 在二叉树中查找值为x的节点，试编写算法打印值为x的节点的所有祖先，假设值为x的节点不多于1个
  */
- void findAncestorOfX(BinaryNode * & root , int x, vector<BinaryNode *> & ancestor)
-{
-     stack<BinaryNode *> nodeStack;
-     BinaryNode * p = root;
-     BinaryNode * recent = nullptr;
+void findAncestorOfX(BinaryNode *&root, int x, vector<BinaryNode *> &ancestor) {
+    stack<BinaryNode *> nodeStack;
+    BinaryNode *p = root;
+    BinaryNode *recent = nullptr;
 
-     while( p || !nodeStack.empty())
-     {
-         if(p)
-         {
-             if(p->element == x)
-                 break;
-             nodeStack.push(p);
-             p = p->left;
-         }
-         else
-         {
-             p = nodeStack.top();
-             //有右儿子
-             if(p->right && p->right != recent)
-             {
-                 p = p->right;
-                 nodeStack.push(p);
-                 p = p->left;
-             }
-             //没有右儿子
-             else
-             {
-                 nodeStack.pop();
-                 recent = p;
-                 p = nullptr;
-             }
-         }
-     }
+    while (p || !nodeStack.empty()) {
+        if (p) {
+            if (p->element == x)
+                break;
+            nodeStack.push(p);
+            p = p->left;
+        } else {
+            p = nodeStack.top();
+            //有右儿子
+            if (p->right && p->right != recent) {
+                p = p->right;
+                nodeStack.push(p);
+                p = p->left;
+            }
+                //没有右儿子
+            else {
+                nodeStack.pop();
+                recent = p;
+                p = nullptr;
+            }
+        }
+    }
 
-     //只要栈非空，就一直弹出，弹出的都是x的祖先
-     while (!nodeStack.empty())
-     {
-         ancestor.push_back(nodeStack.top());
-         nodeStack.pop();
-     }
+    //只要栈非空，就一直弹出，弹出的都是x的祖先
+    while (!nodeStack.empty()) {
+        ancestor.push_back(nodeStack.top());
+        nodeStack.pop();
+    }
 
 }
 
 /**
  * 编写算法找到p和q的最近公共祖先节点r
  */
- //可以通过使用上面一题已经写好的方法，然后通过两个祖先数组找到最近的元素即可
-void ancestor(BinaryNode * & root, BinaryNode * p, BinaryNode * q, BinaryNode * & r)
-{
+//可以通过使用上面一题已经写好的方法，然后通过两个祖先数组找到最近的元素即可
+void ancestor(BinaryNode *&root, BinaryNode *p, BinaryNode *q, BinaryNode *&r) {
     vector<BinaryNode *> pAncestor;
     vector<BinaryNode *> qAncestor;
 
     findAncestorOfX(root, p->element, pAncestor);
     findAncestorOfX(root, q->element, qAncestor);
 
-    BinaryNode * target;
+    BinaryNode *target;
 
     int flag = 0;
 
-    for(auto & pNode: pAncestor)
-    {
-        for(auto & qNode: qAncestor)
-        {
-            if(pNode == qNode && flag == 0) {
+    for (auto &pNode: pAncestor) {
+        for (auto &qNode: qAncestor) {
+            if (pNode == qNode && flag == 0) {
                 target = pNode;
                 flag = 1;
             }
@@ -549,40 +507,38 @@ void ancestor(BinaryNode * & root, BinaryNode * p, BinaryNode * q, BinaryNode * 
  * 设计一个算法，求非空二叉树的宽短
  */
 
-int breath(BinaryNode * & root)
-{
+int breath(BinaryNode *&root) {
     queue<BinaryNode *> nodeQueue;
 
-    BinaryNode * p = root;
+    BinaryNode *p = root;
 
     nodeQueue.push(p);
 
-    BinaryNode * last = nodeQueue.back();
+    BinaryNode *last = nodeQueue.back();
 
     int maxWidth = -1;
     int levelWidth = 0;
 
-    while(!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         p = nodeQueue.front();
         nodeQueue.pop();
         ++levelWidth;
 
-        if(p->left)
+        if (p->left)
             nodeQueue.push(p->left);
-        if(p->right)
+        if (p->right)
             nodeQueue.push(p->right);
 
-        if(levelWidth > maxWidth)
+        if (levelWidth > maxWidth)
             maxWidth = levelWidth;
 
-        if(last == p) {
+        if (last == p) {
             last = nodeQueue.back();
             levelWidth = 0;
         }
     }
 
-    return  maxWidth;
+    return maxWidth;
 
 }
 
@@ -590,45 +546,41 @@ int breath(BinaryNode * & root)
  * 设有一棵满二叉树，已知其先序序列为pre，设计一个算法求其后序序列
  */
 
- void buildTree(BinaryNode * & root, int pre[], int l, int r)
-{
-     if(l > r)
-         return;
+void buildTree(BinaryNode *&root, int pre[], int l, int r) {
+    if (l > r)
+        return;
 
-     int total = r - l + 1;
+    int total = r - l + 1;
 
-     int halfTreeSize = (total-1)/2;
+    int halfTreeSize = (total - 1) / 2;
 
-     int subLeftTreeLeft = l + 1;
-     int subLeftTreeRight = l + halfTreeSize;
+    int subLeftTreeLeft = l + 1;
+    int subLeftTreeRight = l + halfTreeSize;
 
-     int subRightTreeLeft = l + halfTreeSize + 1;
-     int subRightTreeRight = l + 2 * halfTreeSize;
+    int subRightTreeLeft = l + halfTreeSize + 1;
+    int subRightTreeRight = l + 2 * halfTreeSize;
 
-     root = new BinaryNode(pre[l]);
+    root = new BinaryNode(pre[l]);
 
-     //构建左子树
-     buildTree(root->left, pre, subLeftTreeLeft, subLeftTreeRight);
-     //构建右子树
-     buildTree(root->right, pre, subRightTreeLeft, subRightTreeRight);
+    //构建左子树
+    buildTree(root->left, pre, subLeftTreeLeft, subLeftTreeRight);
+    //构建右子树
+    buildTree(root->right, pre, subRightTreeLeft, subRightTreeRight);
 
 }
 
-void postOrder(BinaryNode * & root, vector<int> & post)
-{
-     if(root)
-     {
-         postOrder(root->left, post);
-         postOrder(root->right, post);
-         post.push_back(root->element);
-     }
+void postOrder(BinaryNode *&root, vector<int> &post) {
+    if (root) {
+        postOrder(root->left, post);
+        postOrder(root->right, post);
+        post.push_back(root->element);
+    }
 }
 
-void getPostByPre(int pre[], vector<int> & post, int n)
-{
-     BinaryNode * root;
-     buildTree(root, pre, 0, n-1);
-     postOrder(root, post);
+void getPostByPre(int pre[], vector<int> &post, int n) {
+    BinaryNode *root;
+    buildTree(root, pre, 0, n - 1);
+    postOrder(root, post);
 
 }
 
@@ -637,30 +589,25 @@ void getPostByPre(int pre[], vector<int> & post, int n)
  * 链接时用叶节点的右指针域来存在单链表指针
  */
 
-void linkLeaf(BinaryNode * & root, BinaryNode * & pre, BinaryNode * & head)
-{
-    if(root)
-    {
+void linkLeaf(BinaryNode *&root, BinaryNode *&pre, BinaryNode *&head) {
+    if (root) {
         linkLeaf(root->left, pre, head);
         linkLeaf(root->right, pre, head);
 
-        if(root->left == nullptr && root->right == nullptr && pre != nullptr)
-        {
+        if (root->left == nullptr && root->right == nullptr && pre != nullptr) {
             pre->right = root;
             pre = root;
         }
-        if(root->left == nullptr && root->right == nullptr && pre == nullptr)
-        {
+        if (root->left == nullptr && root->right == nullptr && pre == nullptr) {
             pre = root;
             head = root;
         }
     }
 }
 
-BinaryNode * linkLeaf(BinaryNode * & root)
-{
-    BinaryNode * pre = nullptr;
-    BinaryNode * head = nullptr;
+BinaryNode *linkLeaf(BinaryNode *&root) {
+    BinaryNode *pre = nullptr;
+    BinaryNode *head = nullptr;
     linkLeaf(root, pre, head);
     return head;
 }
@@ -671,22 +618,20 @@ BinaryNode * linkLeaf(BinaryNode * & root)
  * 且T1的右子树的T2的右子树是相似的
  */
 
-int similar(BinaryNode * & t1, BinaryNode * & t2)
-{
+int similar(BinaryNode *&t1, BinaryNode *&t2) {
     //这道题应该采用递归的思想，因为题目其实就已经暗示了递归的方法
     int left;
     int right;
 
     //如果两树皆为空，则相似
-    if(t1 == nullptr && t2 == nullptr)
+    if (t1 == nullptr && t2 == nullptr)
         return 1;
 
     //如果有一树为空，另一树不为空，则不相似
-    if(t1 == nullptr || t2 == nullptr)
+    if (t1 == nullptr || t2 == nullptr)
         return 0;
-    //否则两树都不为空，则需要进一步判断左右子树的情况
-    else
-    {
+        //否则两树都不为空，则需要进一步判断左右子树的情况
+    else {
         left = similar(t1->left, t2->left);
         right = similar(t1->right, t2->right);
         return left && right;
@@ -698,13 +643,12 @@ int similar(BinaryNode * & t1, BinaryNode * & t2)
  * 二叉树的带权路径长度（WPL）是二叉树中所有叶节点的带权路径长度之和。给定一棵二叉树T，采用二叉链表存储
  * 请设计求T的WPL的算法
  */
- //本质上还是可以通过层序遍历来做，遍历的过程记录高度，然后遇到叶子节点就计算带权路径长
+//本质上还是可以通过层序遍历来做，遍历的过程记录高度，然后遇到叶子节点就计算带权路径长
 
-int computeWPL(BinaryNode * & root)
-{
+int computeWPL(BinaryNode *&root) {
     queue<BinaryNode *> nodeQueue;
 
-    BinaryNode * p = root;
+    BinaryNode *p = root;
 
     int WPL = 0;
 
@@ -712,30 +656,28 @@ int computeWPL(BinaryNode * & root)
 
     nodeQueue.push(p);
 
-    BinaryNode * last = nodeQueue.front();
+    BinaryNode *last = nodeQueue.front();
 
 
-    while (!nodeQueue.empty())
-    {
+    while (!nodeQueue.empty()) {
         p = nodeQueue.front();
         nodeQueue.pop();
 
         int isLeaf = 0;
 
-        if(p->left) {
+        if (p->left) {
             nodeQueue.push(p->left);
             ++isLeaf;
         }
-        if(p->right) {
+        if (p->right) {
             nodeQueue.push(p->right);
             ++isLeaf;
         }
 
-        if(!isLeaf)
+        if (!isLeaf)
             WPL += length * p->element;
 
-        if(last == p)
-        {
+        if (last == p) {
             ++length;
             last = nodeQueue.back();
         }
@@ -750,26 +692,24 @@ int computeWPL(BinaryNode * & root)
  */
 
 
-void convert(BinaryNode * & root, int deep)
-{
-    if(root == nullptr)
+void convert(BinaryNode *&root, int deep) {
+    if (root == nullptr)
         return;
-    else if(root->left == nullptr && root->right == nullptr)
-        std::cout<<root->element;
+    else if (root->left == nullptr && root->right == nullptr)
+        std::cout << root->element;
     else {
-        if(deep > 1)
-            std::cout<< "(";
+        if (deep > 1)
+            std::cout << "(";
         convert(root->left, deep + 1);
-        std::cout<<root->element;
+        std::cout << root->element;
         convert(root->right, deep + 1);
-        if(deep > 1)
-            std::cout<< ")";
+        if (deep > 1)
+            std::cout << ")";
     }
 
 }
 
-void convertAstToInOrder(BinaryNode * & root)
-{
+void convertAstToInOrder(BinaryNode *&root) {
     convert(root, 1);
 }
 
@@ -778,11 +718,9 @@ void convertAstToInOrder(BinaryNode * & root)
  * 判断一棵树是否是二叉查找树
  */
 
-bool assertBinarySearchTree(BinaryNode * & root)
-{
+bool assertBinarySearchTree(BinaryNode *&root) {
     bool leftS = true, rightS = true;
-    if(root)
-    {
+    if (root) {
 
         leftS = assertBinarySearchTree(root->left);
         rightS = assertBinarySearchTree(root->right);
@@ -793,16 +731,164 @@ bool assertBinarySearchTree(BinaryNode * & root)
             return false;
             */
 
-        if(root->left && root->left->element > root->element)
+        if (root->left && root->left->element > root->element)
             leftS = false;
-        if(root->right && root->right->element < root->element)
-            rightS  = false;
+        if (root->right && root->right->element < root->element)
+            rightS = false;
 
     }
 
     return leftS && rightS;
 }
 
+/**
+ * 设计一个算法，求出指定节点在给定二叉排序树中的层次
+ */
 
+int getLevel(BinaryNode *&root, int x, int level) {
+    if (root == nullptr)
+        return -1;
+    if (root->element == x)
+        return level;
+    else if (x < root->element)
+        return getLevel(root->left, x, level + 1);
+    else if (x > root->element)
+        return getLevel(root->right, x, level + 1);
+
+}
+
+int getLevel(BinaryNode *&root, int x) {
+    return getLevel(root, x, 1);
+}
+
+
+/**
+ * 利用二叉树遍历的思想编写一个判断二叉树是否是平衡二叉树的算法
+ */
+
+//这个算法效率太低了
+bool balance(BinaryNode *&root) {
+    bool leftS = true, rightS = true;
+    if (root) {
+        if (std::abs((height(root->left) - height(root->right))) > 1)
+            return false;
+
+        leftS = balance(root->left);
+        rightS = balance(root->right);
+
+    }
+
+    return leftS && rightS;
+
+}
+
+//给出一个更好的算法，忽略驱动程序
+void balance(BinaryNode *&root, int &b, int &h) {
+    //标记左子树的平衡情况和高度
+    int bl = 0, hl = 0;
+    //标记右子树的平衡情况和高度
+    int br = 0, hr = 0;
+    if (root == nullptr) {
+        b = 1;
+        h = 0;
+    } else if (root->left == nullptr && root->right == nullptr) {
+        b = 1;
+        h = 1;
+    } else {
+        balance(root->left, bl, hl);
+        balance(root->right, br, hr);
+
+        h = std::max(hl, hr) + 1;
+
+        if(std::abs(hl - hr) > 1 )
+            b = 0;
+        else
+            b = bl && br;
+    }
+}
+
+/**
+ * 设计一个算法，求出给定二叉排序树中最小和最大的关键字
+ */
+
+bool findMin(BinaryNode * & root, int & x)
+{
+    if(root == nullptr)
+        return false;
+    if(root->left == nullptr) {
+        x = root->element;
+        return true;
+    }
+    else {
+        return findMin(root->left, x);
+    }
+}
+
+bool findMax(BinaryNode * & root, int & x)
+{
+    if(root == nullptr)
+        return false;
+    if(root->right == nullptr) {
+        x = root->element;
+        return true;
+    }
+    else {
+        return findMax(root->left, x);
+    }
+}
+
+/**
+ * 设计一个算法，从大到小输出二叉排序树中所有值不小于k的关键字
+ */
+
+//要有序我觉得中序遍历是最合适的，可以利用类似于查找的方法
+//首先利用查找，找到值为k的节点之后，返回k的右儿子节点，再对其进行中序遍历，并依次入栈，最后只需要弹出栈中内容，即是从大到小的顺序
+
+
+//查找程序
+BinaryNode * findK(BinaryNode * & root, int k)
+{
+    if(root == nullptr)
+        return nullptr;
+    if(root->element == k)
+        return root;
+    else if(k < root->element)
+        return findK(root->left, k);
+    else
+        return findK(root->right, k);
+}
+
+//假设root是K节点的右儿子节点，进行中序遍历
+void greaterThanK(BinaryNode * & root, stack<int> & numStack)
+{
+    if(root)
+    {
+        greaterThanK(root->left, numStack);
+        numStack.push(root->element);
+        greaterThanK(root->right, numStack);
+    }
+}
+
+//驱动程序
+void printGreaterThanK(BinaryNode * & root, int k)
+{
+    BinaryNode * kNode = findK(root, k);
+    if(kNode == nullptr)
+        return;
+
+    stack<int> numStack;
+
+    greaterThanK(kNode->right, numStack);
+
+    while (!numStack.empty())
+    {
+        std::cout<<numStack.top()<<" ";
+        numStack.pop();
+    }
+}
+
+/**
+ * 设给定权值w = {5, 7, 2, 3, 6, 8, 9}，试构造关于w的一颗哈夫曼树，并求其加权路径长度WPL
+ */
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
