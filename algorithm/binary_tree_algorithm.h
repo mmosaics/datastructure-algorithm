@@ -888,7 +888,24 @@ void printGreaterThanK(BinaryNode * & root, int k)
 }
 
 /**
+ * 计算二叉树的节点的总个数
+ */
+int getNumberOfNodes(BinaryNode * & root)
+{
+    if(root) {
+        return getNumberOfNodes(root->left) + getNumberOfNodes(root->right) + 1;
+    }
+    else {
+        return 0;
+    }
+}
+
+/**
  * 设给定权值w = {5, 7, 2, 3, 6, 8, 9}，试构造关于w的一颗哈夫曼树，并求其加权路径长度WPL
  */
+
+
+
+
 
 #endif //DATA_STRUCTURE_CPP_BINARY_TREE_ALGORITHM_H
