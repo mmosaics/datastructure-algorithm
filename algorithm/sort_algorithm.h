@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <iostream>
+#include <algorithm>
 
 using std::vector;
 
@@ -43,8 +44,52 @@ void insertionSort(vector<int> & nums)
 
 
 //选择排序
+void selectionSort(vector<int> & nums)
+{
+    int i, j;
+    int minIndex;
+    for(i = 0; i < nums.size(); ++i)
+    {
+        minIndex = i;
+        //找到最小值的index
+        for(j = i + 1; j < nums.size(); ++j) {
+            if(nums[j] < nums[minIndex])
+                minIndex = j;
+        }
+
+        std::swap(nums[i], nums[minIndex]);
+    }
+}
+
+//冒泡排序
+void bubbleSort(vector<int> & nums)
+{
+    unsigned long i, j;
+    for(i = 0; i < nums.size(); ++i)
+    {
+        for(j = nums.size() - 1; j > i; --j)
+        {
+            if(nums[j-1] > nums[j])
+                std::swap(nums[j], nums[j-1]);
+        }
+    }
+}
 
 
+//希尔排序
+void shellSort(vector<int> & nums)
+{
+    
+}
+
+
+
+//堆排序
+
+/**
+ * 简单的排序不需要过多说明
+ * 但是nlogn的排序需要好好思考一下
+ */
 
 
 
