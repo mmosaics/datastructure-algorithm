@@ -6,6 +6,7 @@
 #define DATA_STRUCTURE_CPP_SORT_ALGORITHM_H
 
 #include <vector>
+#include <iostream>
 
 using std::vector;
 
@@ -14,24 +15,34 @@ using std::vector;
  * 为了实现简单，都默认从小到大排序
  */
 
-//基本的排序算法
+void printVector(vector<int> & nums)
+{
+    for(auto & num : nums)
+        std::cout<< num << " ";
+
+    std::cout<<std::endl;
+
+}
+
+//vector<int> nums{23, 45, 11, 90, 27, 20, 37, 78};
+
+//排序算法
 void insertionSort(vector<int> & nums)
 {
     int waitForInsert;
-    for(int i = 1; i < nums.size(); ++i)
+    int i, j;
+    for(i = 1; i < nums.size(); ++i)
     {
         waitForInsert = nums[i];
-        for(int j = i - 1; j >= 0; --j)
-        {
-            
-
-        }
-
-
+        for(j = i; j > 0 && waitForInsert < nums[j-1]; --j)
+            nums[j] = nums[j-1];
+        nums[j] = waitForInsert;
     }
 
-
 }
+
+
+//选择排序
 
 
 
