@@ -844,7 +844,6 @@ bool findMax(BinaryNode * & root, int & x)
 //要有序我觉得中序遍历是最合适的，可以利用类似于查找的方法
 //首先利用查找，找到值为k的节点之后，返回k的右儿子节点，再对其进行中序遍历，并依次入栈，最后只需要弹出栈中内容，即是从大到小的顺序
 
-
 //查找程序
 BinaryNode * findK(BinaryNode * & root, int k)
 {

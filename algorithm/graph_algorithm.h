@@ -24,6 +24,8 @@ using std::queue;
 
 //先实现基本的结构
 
+const int INFINITY = INT_MAX;
+
 //图的节点
 struct Vertex {
     int id;
@@ -40,18 +42,35 @@ struct Vertex {
 class Graph {
 
 public:
-    explicit Graph(bool isDirectedGraph = false, int s = 0): directed(isDirectedGraph), size(s){}
+    explicit Graph(bool isDirectedGraph = false): directed(isDirectedGraph){}
+
+    explicit Graph(bool isDirectedGraph = false, int numberOfVertex = 0): directed(isDirectedGraph), size(numberOfVertex)
+    {
+        for(int i = 0; i < numberOfVertex; ++i) {
+
+            //初始化节点
+            vertexList.push_back(new Vertex(i, string("v").append(std::to_string(i))));
+
+            //初始化边
+            vector<int> edgeOfVertex;
+            edgeOfVertex.resize(numberOfVertex);
+            for(auto & ele: edgeOfVertex)
+                ele = INFINITY;
+
+            edges.push_back(std::move(edgeOfVertex));
+        }
+
+    }
 
 public:
     vector<Vertex *> vertexList;
     vector<vector<int>> edges;
 
-    int size;
+    int size = 0;
     bool directed;
 
 };
 
-const int INFINITY = INT_MAX;
 
 /**
  * 判断图G是否存在边<x，y>
@@ -78,11 +97,12 @@ int insertVertex(Graph & G, const string & name)
     G.vertexList.push_back(new Vertex(id, name));
 
     //更新邻接矩阵
-    vector<int> newLine;
+    vector<int> newLine(G.size - 1, INFINITY);
     G.edges.push_back(std::move(newLine));
 
+    //为其他边添加一列，代表加入了新节点
     for(auto & vec: G.edges)
-        vec.resize(G.size);
+        vec.push_back(INFINITY);
 
     return id;
 }
@@ -179,7 +199,7 @@ int firstNeighbor(Graph & G, int x)
 int nextNeighbor(Graph & G, int x, int y) {
     vector<int> &edgeOfX = G.edges[x];
 
-    for (int i = 0; i < edgeOfX.size(); ++i) {
+    for (int i = y+1; i < edgeOfX.size(); ++i) {
         if (i != y && edgeOfX[i] != INFINITY)
             return i;
     }
@@ -237,12 +257,11 @@ void BFS(Graph & G, int v)
         //标记为已访问
         G.vertexList[v]->visited = true;
 
-        std::cout<<"1"<<std::endl;
         //遍历v的邻接节点，如果有，则入队
         for(int w = firstNeighbor(G, v); w >= 0; w = nextNeighbor(G, v, w))
         {
             //如果这个节点是v的邻接点，没有被访问过，则要入队
-            if(G.vertexList[w]->visited)
+            if(!G.vertexList[w]->visited)
                 vertexQueue.push(w);
         }
 
