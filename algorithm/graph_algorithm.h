@@ -238,8 +238,6 @@ void setEdgeValue(Graph & G, int x, int y, int weight)
 /**
  * 和树的层序遍历一样，都需要用一个队列辅助，还要考虑图不是连通的，所以会有多个连通分量，所以都要遍历到
  */
-
-
 void BFS(Graph & G, int v)
 {
     //初始化一个队列
@@ -267,12 +265,41 @@ void BFS(Graph & G, int v)
 
     }
 
-
-
-
-
 }
 
+//BFS算法求单源最短路径
+
+/*
+ * 和dijkstr大同小异，只是只能用于无权图
+ */
+
+void findMinDistanceBFS(Graph & G, int v, int d[])
+{
+    //首先把距离置为无穷大
+    for(int i = 0; i < G.size; ++i)
+        d[i] = INFINITY;
+    //标记起始点距离为0
+    d[v] = 0;
+    queue<int> vertexQueue;
+    vertexQueue.push(v);
+
+    while (!vertexQueue.empty())
+    {
+        int tmp = vertexQueue.front();
+        vertexQueue.pop();
+        //出队，并标记为已访问
+        G.vertexList[tmp]->visited = true;
+
+        //遍历邻接节点
+        for(int w = firstNeighbor(G, tmp); w >= 0; w = nextNeighbor(G, tmp, w))
+        {
+            int newDis = d[tmp] + 1;
+            if(newDis < d[w])
+                d[w] = newDis;
+            vertexQueue.push(w);
+        }
+    }
+}
 
 
 
