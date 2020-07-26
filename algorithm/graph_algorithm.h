@@ -34,6 +34,12 @@ struct Vertex {
     //标识是否被访问过
     bool visited = false;
 
+    //known域，用于dijkstra prim
+    bool known = false;
+
+    //标示路径，用于dijktra prim
+    int path = -1;
+
     Vertex(int i, string name): id(i), name(std::move(name)) {}
 
 };
@@ -234,6 +240,26 @@ void setEdgeValue(Graph & G, int x, int y, int weight)
     G.edges[x][y] = weight;
 }
 
+/**
+ * 把图中所有节点置为未访问状态
+ * @param G
+ */
+void setAllUnvisited(Graph & G) {
+
+    for(int i = 0; i < G.size; ++i)
+        G.vertexList[i]->visited = false;
+}
+
+/**
+ * 把图中所有节点置为unknown状态
+ * @param G
+ */
+void setAllUnknown(Graph & G) {
+
+    for(int i = 0; i < G.size; ++i)
+        G.vertexList[i]->known = false;
+}
+
 //图的广度优先遍历
 /**
  * 和树的层序遍历一样，都需要用一个队列辅助，还要考虑图不是连通的，所以会有多个连通分量，所以都要遍历到
@@ -273,7 +299,7 @@ void BFS(Graph & G, int v)
  * 和dijkstr大同小异，只是只能用于无权图
  */
 
-void findMinDistanceBFS(Graph & G, int v, int d[])
+void findMinDistanceBFS(Graph & G, int v, int* d)
 {
     //首先把距离置为无穷大
     for(int i = 0; i < G.size; ++i)
@@ -293,16 +319,96 @@ void findMinDistanceBFS(Graph & G, int v, int d[])
         //遍历邻接节点
         for(int w = firstNeighbor(G, tmp); w >= 0; w = nextNeighbor(G, tmp, w))
         {
-            int newDis = d[tmp] + 1;
-            if(newDis < d[w])
-                d[w] = newDis;
-            vertexQueue.push(w);
+            if(!G.vertexList[w]->visited) {
+                int newDis = d[tmp] + 1;
+                if (newDis < d[w])
+                    d[w] = newDis;
+                vertexQueue.push(w);
+            }
         }
     }
 }
 
 
+//图的深度优先遍历
+void DFS(Graph & G, int v) {
+    //visit(v);
+    G.vertexList[v]->visited = true;
+    for (int w = firstNeighbor(G, v); w >= 0; w = nextNeighbor(G, v, w)) {
+        if(!G.vertexList[w]->visited)
+            DFS(G, w);
+    }
+}
+//如果图是非连通的，则需要对所有节点进行访问
+void DFSTraverse(Graph & G) {
+    setAllUnvisited(G);
+    for(int v = 0; v < G.size; ++v)
+        DFS(G, v);
+}
 
+
+//Prim算法
+/**
+ * prim算法是一种贪心，实质上也是层序遍历的一种应用
+ * @param G
+ * @param mst
+ */
+void primForMST(Graph & G, Graph & mst, int* d)
+{
+    //初始化距离数组
+    for(int i = 0; i < G.size; ++i)
+        d[i] = INFINITY;
+    setAllUnknown(G);
+
+    int totalUnknown = G.size;
+
+    //首先置任意一个节点为known，并作为起始点构建生成树，这里选择0
+    d[0] = 0;
+
+    while (totalUnknown>0)
+    {
+        //首先选择目前拥有最短距离且为unknown的节点
+        int minDist = INFINITY;
+        int minVertex;
+        for(int i = 0; i < G.size; ++i) {
+            if(d[i] < minDist && !G.vertexList[i]->known) {
+                minDist = d[i];
+                minVertex = i;
+            }
+        }
+
+        //经过循环后minVertex里存储的即是目前最短的节点，将它标记为known
+        G.vertexList[minVertex]->known = true;
+        --totalUnknown;
+
+        //然后对minVertex的邻接节点进行遍历，更新距离表
+        for(int w = firstNeighbor(G, minVertex); w >= 0; w = nextNeighbor(G, minVertex, w)) {
+            if(!G.vertexList[w]->known ) {
+                int weight = getEdgeValue(G, minVertex, w);
+                if (weight < d[w]) {
+                    d[w] = weight;
+                    G.vertexList[w]->path = minVertex;
+                }
+            }
+        }
+
+    }
+
+    //给mst加边
+    for(int i = 0; i < G.size; ++i)
+        if(G.vertexList[i]->path == -1)
+            continue;
+        else
+            addEdge(mst, i, G.vertexList[i]->path, getEdgeValue(G, i, G.vertexList[i]->path));
+
+}
+
+void primForMST(Graph & G, Graph & mst)
+{
+    int * d = new int[G.size];
+    primForMST(G, mst, d);
+    delete[] d;
+}
 
 
 
