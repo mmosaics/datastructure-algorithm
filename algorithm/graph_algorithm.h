@@ -11,10 +11,13 @@
 #include <exception>
 #include "../base_structure/dsexceptions.h"
 #include <queue>
+#include "../base_structure/DisjSets.h"
+#include <functional>
 
 using std::string;
 using std::vector;
 using std::queue;
+using std::priority_queue;
 
 /**
  * 在数据结构模块，我已经完成了以邻接表为基础的图论算法，并且进行了封装
@@ -41,6 +44,16 @@ struct Vertex {
     int path = -1;
 
     Vertex(int i, string name): id(i), name(std::move(name)) {}
+
+};
+
+//图的边
+struct Edge {
+    int from;
+    int to;
+    int weight;
+
+    Edge(int f, int t, int w): from(f), to(t), weight(w){}
 
 };
 
@@ -403,7 +416,7 @@ void primForMST(Graph & G, Graph & mst, int* d)
 
 }
 
-void primForMST(Graph & G, Graph & mst)
+void prim(Graph & G, Graph & mst)
 {
     int * d = new int[G.size];
     primForMST(G, mst, d);
@@ -411,6 +424,118 @@ void primForMST(Graph & G, Graph & mst)
 }
 
 
+//Kruskal
 
+
+void kruskal(Graph & G, Graph & mst)
+{
+    vector<Edge> edges;
+
+    //我们需要先把边存储在一个堆中，邻接矩阵的边是以数组存储的，所以还需要进行一次遍历把所有边
+    for(int i = 0; i < G.size; ++i) {
+        for (int j = 0; j < G.size; ++j)
+            if (adjacent(G, i, j))
+                edges.emplace_back(i, j, getEdgeValue(G, i, j));
+    }
+
+    //先初始化一个堆，这应当是一个最小堆
+    auto cmp = [](const Edge & e1, const Edge & e2)->bool {return e1.weight > e2.weight;};
+    priority_queue<Edge, vector<Edge>, decltype(cmp)> priorityQueue(cmp, edges);
+
+    //初始化一个不相交集
+    DisjSets disjSets(G.size);
+
+    while (!priorityQueue.empty())
+    {
+        //如果队列不为空，则会弹出最小的边
+        Edge edge = priorityQueue.top();
+        priorityQueue.pop();
+
+        //如果这条边的两个节点属于不同的集合，则把他们加入到生成树中
+        int fromSet = disjSets.find(edge.from);
+        int toSet = disjSets.find(edge.to);
+
+        //这两个节点属于不同集合
+        if(fromSet != toSet) {
+            addEdge(mst, edge.from, edge.to, edge.weight);
+            disjSets.unionSets(fromSet, toSet);
+
+        }
+    }
+}
+
+//Dijkstra
+
+void dijkstra(Graph & G, int u, int* d)
+{
+    //把所有置为unkown
+    setAllUnknown(G);
+    //把所有距离置为INFINITY
+    for(int i = 0; i < G.size; ++i)
+        d[i] = INFINITY;
+    //因为u为起始点，所以把距离置为0
+    d[u] = 0;
+
+    int totalUnknown = G.size;
+    while (totalUnknown > 0)
+    {
+        int minVertex = -1;
+        int minDis = INFINITY;
+        //找到距离最小的点，并标记为known
+        for(int i = 0; i < G.size; ++i) {
+            if(d[i] < minDis && !G.vertexList[i]->known) {
+                minDis = d[i];
+                minVertex = i;
+            }
+        }
+
+        G.vertexList[minVertex]->known = true;
+        --totalUnknown;
+
+        //开始对minVertex的邻接节点更新，一定是对unkown节点进行操作
+        for(int w = firstNeighbor(G, minVertex); w >= 0; w = nextNeighbor(G, minVertex, w)) {
+            if(!G.vertexList[w]->known) {
+                int newDis = d[minVertex] + getEdgeValue(G, minVertex, w);
+                //如果新的距离小于当前距离，则更新
+                if(newDis < d[w]) {
+                    d[w] = newDis;
+                    G.vertexList[w]->path = minVertex;
+                }
+            }
+        }
+    }
+}
+
+void dijkstra(Graph & G, int u)
+{
+    int * d = new int[G.size];
+    dijkstra(G, u, d);
+    delete[] d;
+}
+
+void printShortestPathByDijkstra(Graph & G, int source, int target)
+{
+    dijkstra(G, source);
+    Vertex * v = G.vertexList[target];
+    stack<int> tmpStack;
+    while (v->id >= 0)
+    {
+        tmpStack.push(v->id);
+        //如果v已经是起始节点，则退出循环
+        if(v->path < 0)
+            break;
+        v = G.vertexList[v->path];
+    }
+
+    while(!tmpStack.empty())
+    {
+        if(tmpStack.size() > 1)
+            std::cout<< tmpStack.top() << "->";
+        else if(tmpStack.size() == 1)
+            std::cout<< tmpStack.top();
+        tmpStack.pop();
+    }
+    std::cout<<std::endl;
+}
 
 #endif //DATA_STRUCTURE_CPP_GRAPH_ALGORITHM_H
