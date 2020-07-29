@@ -43,6 +43,9 @@ struct Vertex {
     //标示路径，用于dijktra prim
     int path = -1;
 
+    //入度
+    int inDegree = 0;
+
     Vertex(int i, string name): id(i), name(std::move(name)) {}
 
 };
@@ -536,6 +539,60 @@ void printShortestPathByDijkstra(Graph & G, int source, int target)
         tmpStack.pop();
     }
     std::cout<<std::endl;
+}
+
+
+//拓扑排序
+
+//需要一个辅助函数计算每个节点的入度
+void computeInDegree(Graph & G)
+{
+    for(int i = 0; i < G.size; ++i) {
+        for(int j = 0; j < G.size; ++j) {
+            if(G.edges[i][j] != INFINITY)
+                ++G.vertexList[j]->inDegree;
+        }
+    }
+}
+
+void topSort(Graph & G)
+{
+    computeInDegree(G);
+    setAllUnvisited(G);
+
+    queue<int> vertexQueue;
+    int tmp;
+    //找到一个入度为0的点，放入队列
+    for(int i = 0; i < G.size; ++i) {
+        if (G.vertexList[i]->inDegree == 0 && !G.vertexList[i]->visited)
+            vertexQueue.push(i);
+    }
+
+    while (!vertexQueue.empty())
+    {
+        tmp = vertexQueue.front();
+        vertexQueue.pop();
+
+        //这里用一个打印表示
+        std::cout<< tmp << "->";
+
+        //标记为已访问
+        G.vertexList[tmp]->visited = true;
+
+        //然后把这个节点指向的节点的入度都减1；
+        for(int i = 0; i < G.size; ++i) {
+            if (G.edges[tmp][i] != INFINITY) {
+                --G.vertexList[i]->inDegree;
+                //如果入度减为0了，则入队
+                if(G.vertexList[i]->inDegree == 0)
+                    vertexQueue.push(i);
+            }
+        }
+
+    }
+
+    std::cout<<"end"<<std::endl;
+
 }
 
 #endif //DATA_STRUCTURE_CPP_GRAPH_ALGORITHM_H
