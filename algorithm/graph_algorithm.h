@@ -27,7 +27,7 @@ using std::priority_queue;
 
 //先实现基本的结构
 
-const int INFINITY = INT_MAX;
+const int INFINITY = 9999999;
 
 //图的节点
 struct Vertex {
@@ -76,11 +76,16 @@ public:
             //初始化边
             vector<int> edgeOfVertex;
             edgeOfVertex.resize(numberOfVertex);
-            for(auto & ele: edgeOfVertex)
-                ele = INFINITY;
-
             edges.push_back(std::move(edgeOfVertex));
         }
+
+        for(int i = 0; i < numberOfVertex; ++i)
+            for(int j = 0; j < numberOfVertex; ++j) {
+                if(i == j)
+                    edges[i][j] = 0;
+                else
+                    edges[i][j] = INFINITY;
+            }
 
     }
 
@@ -592,6 +597,26 @@ void topSort(Graph & G)
     }
 
     std::cout<<"end"<<std::endl;
+
+}
+
+//floyd
+//Floyd算法，求多源最短路径
+
+void floyd(Graph & G, vector<vector<int>> & shortestDistance)
+{
+    shortestDistance = G.edges;
+
+    //最外层循环用来控制是通过哪一个节点来缩短路径的
+    for(int k = 0; k < G.size; ++k) {
+        //内层两循环就是对边的遍历
+        for(int i = 0; i < G.size; ++i)
+            for(int j = 0; j < G.size; ++j) {
+                int byKvertextDis = shortestDistance[i][k] + shortestDistance[k][j];
+                if(byKvertextDis < shortestDistance[i][j])
+                    shortestDistance[i][j] = byKvertextDis;
+            }
+    }
 
 }
 
