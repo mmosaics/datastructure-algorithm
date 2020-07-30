@@ -903,6 +903,17 @@ int getNumberOfNodes(BinaryNode * & root)
  * 设给定权值w = {5, 7, 2, 3, 6, 8, 9}，试构造关于w的一颗哈夫曼树，并求其加权路径长度WPL
  */
 
+struct HuffmanNode
+{
+    int frequency;
+    string element;
+    HuffmanNode* left;
+    HuffmanNode* right;
+
+    HuffmanNode(int f, string e, HuffmanNode * l = nullptr, HuffmanNode * r = nullptr)
+    :frequency(f), element(std::move(e)), left(l), right(r) {}
+    
+};
 
 
 
