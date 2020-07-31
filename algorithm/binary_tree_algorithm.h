@@ -10,6 +10,7 @@
 #include <queue>
 
 using std::queue;
+using std::priority_queue;
 
 /**
  * 这是一个实现二叉树算法的文件，所以没有通过类的方式，直接以面向过程的方法写算法
@@ -674,6 +675,7 @@ int computeWPL(BinaryNode *&root) {
             ++isLeaf;
         }
 
+        //isLeaf等于0，说明是叶子节点
         if (!isLeaf)
             WPL += length * p->element;
 
@@ -905,16 +907,64 @@ int getNumberOfNodes(BinaryNode * & root)
 
 struct HuffmanNode
 {
-    int frequency;
-    string element;
+    int weight;
+    string element = "HuffmanNode";
     HuffmanNode* left;
     HuffmanNode* right;
 
-    HuffmanNode(int f, string e, HuffmanNode * l = nullptr, HuffmanNode * r = nullptr)
-    :frequency(f), element(std::move(e)), left(l), right(r) {}
-    
+    explicit HuffmanNode(int w, HuffmanNode * l = nullptr, HuffmanNode * r = nullptr)
+    :weight(w), left(l), right(r) {}
+
+    HuffmanNode(int w, string e, HuffmanNode * l = nullptr, HuffmanNode * r = nullptr)
+    :weight(w), element(std::move(e)), left(l), right(r) {}
+
 };
 
+void generateHuffmanNodeByWeight(vector<int> & weights, vector<HuffmanNode *> & nodes)
+{
+    for(auto i : weights) {
+        nodes.push_back(new HuffmanNode(i));
+    }
+}
+
+void huffman(vector<int> & weights, HuffmanNode * & root)
+{
+    //这里生成的节点，不需要删除内存，只能在外部清理内存，因为这些节点都是以后形成huffman树的节点
+    vector<HuffmanNode *> nodes;
+    generateHuffmanNodeByWeight(weights, nodes);
+
+    //先构建一个堆用来获取最小的权值，因此需要一个最小堆
+    auto cmp = [](const HuffmanNode * lhs, const HuffmanNode * rhs) -> bool {return lhs->weight > rhs->weight; };
+    priority_queue<HuffmanNode *, vector<HuffmanNode *>, decltype(cmp)> heap(cmp, nodes);
+
+    //堆不为空，就构建哈夫曼树
+    while (!heap.empty())
+    {
+        //如果堆的size为2，则不需要更多步骤，直接把两个节点合并即可
+        if(heap.size() == 1) {
+            root = heap.top();
+            heap.pop();
+        }
+        else if(heap.size() == 2) {
+            root->left = heap.top();
+            heap.pop();
+            root->right = heap.top();
+            heap.pop();
+            root->weight = root->left->weight + root->right->weight;
+        }
+        //对应于一般情形，都是取两个最小的出来，然后组成节点，再放回堆里
+        else {
+            HuffmanNode * node1 = heap.top();
+            heap.pop();
+            HuffmanNode * node2 = heap.top();
+            heap.pop();
+            auto tmp = new HuffmanNode(node1->weight + node2->weight);
+            tmp->left = node1;
+            tmp->right = node2;
+            heap.push(tmp);
+        }
+    }
+}
 
 
 
